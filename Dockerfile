@@ -1,7 +1,7 @@
-# Etapa base com Node.js
+# Use Node.js oficial
 FROM node:20
 
-# Instala as dependências necessárias para o Chromium funcionar no Docker
+# Instale libs necessárias para o Chromium funcionar
 RUN apt-get update && apt-get install -y \
     libgbm1 \
     gconf-service \
@@ -42,17 +42,14 @@ RUN apt-get update && apt-get install -y \
     wget \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# Define diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de dependência
 COPY package*.json ./
 
-# Instala o Puppeteer (última versão)
-RUN npm install puppeteer@latest
+RUN npm install puppeteer@latest express
 
-# Copia o restante do código da aplicação
 COPY . .
 
-# Define o comando para rodar o script
+EXPOSE 3000
+
 CMD ["node", "index.js"]

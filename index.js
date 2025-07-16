@@ -17,8 +17,7 @@ async function simulateVisits() {
   ];
 
   function getRandomUrl() {
-    const index = Math.floor(Math.random() * urls.length);
-    return urls[index];
+    return urls[Math.floor(Math.random() * urls.length)];
   }
 
   const browser = await puppeteer.launch({
@@ -33,7 +32,7 @@ async function simulateVisits() {
       page = await browser.newPage();
       await page.setUserAgent(USER_AGENT);
 
-      // Limpar cookies
+      // Limpa cookies
       const client = await page.target().createCDPSession();
       await client.send('Network.clearBrowserCookies');
 
@@ -51,9 +50,7 @@ async function simulateVisits() {
         console.log(`⚠️ Botão de consentimento não encontrado ou já aceito`);
       }
 
-      // Simula tempo na página
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
+      await new Promise(r => setTimeout(r, 5000));
     } catch (err) {
       console.error(`❌ Erro durante visita: ${err.message}`);
     } finally {
@@ -77,7 +74,6 @@ async function simulateVisitsWrapper() {
     return;
   }
   isRunning = true;
-
   try {
     await simulateVisits();
   } catch (err) {
@@ -87,8 +83,8 @@ async function simulateVisitsWrapper() {
   }
 }
 
-app.get('/', async (req, res) => {
-  simulateVisitsWrapper(); // dispara e retorna rápido
+app.get('/', (req, res) => {
+  simulateVisitsWrapper(); // dispara e responde rápido
   res.send('🔄 Visita em processo (se não estiver rodando já)');
 });
 
