@@ -4,9 +4,10 @@ const puppeteer = require('puppeteer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+let isRunning = false;
+
 async function simulateVisits() {
-  const USER_AGENT =
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
+  const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
 
   const urls = [
     'https://dhpdigital.com.br/',
@@ -25,35 +26,22 @@ async function simulateVisits() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
-  for (let i = 1; i <= 10; i++) {
-    const url = getRandomUrl();
-    const fullUrl = `${url}?utm_source=puppeteer&utm_campaign=simulador&v=${i}`;
-    console.log(`🔁 Visitando ${fullUrl}`);
-
+  for (let i = 1; i <= 20; i++) {
     let page;
     try {
+      const url = getRandomUrl();
       page = await browser.newPage();
       await page.setUserAgent(USER_AGENT);
 
-      // Intercepta e bloqueia recursos pesados
-      await page.setRequestInterception(true);
-      page.on('request', (req) => {
-        const blocked = ['image', 'stylesheet', 'font'];
-        if (blocked.includes(req.resourceType())) {
-          req.abort();
-        } else {
-          req.continue();
-        }
-      });
-
-      // Zera os cookies da aba
+      // Limpar cookies
       const client = await page.target().createCDPSession();
       await client.send('Network.clearBrowserCookies');
 
-      // Vai para a URL
+      const fullUrl = `${url}?utm_source=puppeteer&utm_campaign=simulador&v=${i}`;
+      console.log(`🔁 Visitando ${fullUrl}`);
+
       await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
-      // Tenta aceitar o cookie
       try {
         const consentButton = '#adopt-accept-all-button';
         await page.waitForSelector(consentButton, { timeout: 3000 });
@@ -63,30 +51,47 @@ async function simulateVisits() {
         console.log(`⚠️ Botão de consentimento não encontrado ou já aceito`);
       }
 
+      // Simula tempo na página
       await new Promise(resolve => setTimeout(resolve, 5000));
-      await page.close();
-      console.log(`✅ Visita ${i} finalizada\n`);
+
     } catch (err) {
-      console.error(`❌ Erro durante a visita ${i}: ${err.message}`);
-      if (page) await page.close();
+      console.error(`❌ Erro durante visita: ${err.message}`);
+    } finally {
+      if (page) {
+        try {
+          await page.close();
+        } catch (err) {
+          console.warn(`⚠️ Erro ao fechar página: ${err.message}`);
+        }
+      }
     }
   }
 
   await browser.close();
-  console.log('🎯 Todas as visitas concluídas.');
+  console.log('🎯 Visitas concluídas.');
+}
+
+async function simulateVisitsWrapper() {
+  if (isRunning) {
+    console.log('⚠️ Já tem uma execução rodando, ignorando nova chamada');
+    return;
+  }
+  isRunning = true;
+
+  try {
+    await simulateVisits();
+  } catch (err) {
+    console.error('❌ Erro na simulação:', err);
+  } finally {
+    isRunning = false;
+  }
 }
 
 app.get('/', async (req, res) => {
-  console.log('🚀 Disparando visitas...');
-  try {
-    await simulateVisits();
-    res.send('🎯 Visitas simuladas com sucesso!');
-  } catch (error) {
-    console.error(`❌ Erro geral: ${error.message}`);
-    res.status(500).send('❌ Erro ao simular visitas');
-  }
+  simulateVisitsWrapper(); // dispara e retorna rápido
+  res.send('🔄 Visita em processo (se não estiver rodando já)');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🌐 Servidor rodando na porta ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
