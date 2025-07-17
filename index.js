@@ -1,5 +1,6 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
+const { DateTime } = require('luxon');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +26,7 @@ async function simulateVisits() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 17; i++) {
     let page;
     try {
       const url = getRandomUrl();
@@ -73,6 +74,17 @@ async function simulateVisitsWrapper() {
     console.log('⚠️ Já tem uma execução rodando, ignorando nova chamada');
     return;
   }
+
+  //✅ Verifica o horário antes de começar
+  const now = DateTime.now().setZone('America/Sao_Paulo');
+  const hour = now.hour;
+  console.log(`⏰ Hora atual em São Paulo: ${hour}h`);
+
+  if (hour < 7 || hour > 11) {
+    console.log('⏱ Fora do horário permitido. Execução cancelada.');
+    return;
+  }
+
   isRunning = true;
   try {
     await simulateVisits();
@@ -83,8 +95,20 @@ async function simulateVisitsWrapper() {
   }
 }
 
+
 app.get('/', (req, res) => {
-  simulateVisitsWrapper(); // dispara e responde rápido
+  //const now = DateTime.now().setZone('America/Sao_Paulo');
+  //const hour = now.hour;
+
+  //console.log(`⏰ Hora atual em São Paulo: ${hour}h`);
+
+  //if (hour < 7 || hour > 9) {
+    //res.send('⏱ Fora do horário programado, nenhuma visita será disparada.');
+    //console.log(`⏱ Requisição fora do horário permitido (${hour}h) - visitas não disparadas.`);
+    //return;
+  //}
+
+  simulateVisitsWrapper(); // dispara a visita async
   res.send('🔄 Visita em processo (se não estiver rodando já)');
 });
 

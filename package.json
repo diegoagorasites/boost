@@ -1,13 +1,13 @@
 {
-  "name": "trafego",
+  "name": "simulador-visitas",
   "version": "1.0.0",
-  "description": "Simulador de visitas com Puppeteer",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "puppeteer": "^21.3.8"
+    "luxon": "^3.4.0",
+    "puppeteer": "^22.8.2"
   }
 }

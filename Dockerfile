@@ -1,10 +1,13 @@
-# Use Node.js oficial
+# Etapa base com Node.js e Debian
 FROM node:20
 
-# Instale libs necessárias para o Chromium funcionar
+# Define o fuso horário explicitamente
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Instala as dependências necessárias para o Chromium funcionar no Docker
 RUN apt-get update && apt-get install -y \
     libgbm1 \
-    gconf-service \
     libasound2 \
     libatk1.0-0 \
     libc6 \
@@ -14,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     libexpat1 \
     libfontconfig1 \
     libgcc1 \
-    libgconf-2-4 \
     libgdk-pixbuf2.0-0 \
     libglib2.0-0 \
     libgtk-3-0 \
@@ -37,19 +39,22 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     fonts-liberation \
     libappindicator1 \
-    lsb-release \
     xdg-utils \
     wget \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
+# Cria diretório da aplicação
 WORKDIR /app
 
+# Copia e instala as dependências
 COPY package*.json ./
+RUN npm install
 
-RUN npm install puppeteer@latest express
-
+# Copia o restante do código
 COPY . .
 
+# Expõe a porta (se estiver usando Express)
 EXPOSE 3000
 
+# Comando para iniciar o app
 CMD ["node", "index.js"]
