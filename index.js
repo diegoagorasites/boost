@@ -11,10 +11,9 @@ async function simulateVisits() {
   const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
 
   const urls = [
-    'https://dhpdigital.com.br/',
-    'https://dhpdigital.com.br/',
-    'https://dhpdigital.com.br/servicos/',
-    'https://dhpdigital.com.br/contato/',
+    'https://tvinga.com.br/',
+    'https://tvinga.com.br/',
+    'https://tvinga.com.br/movies/',
   ];
 
   function getRandomUrl() {
