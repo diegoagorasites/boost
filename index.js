@@ -75,16 +75,6 @@ async function simulateVisitsWrapper() {
     return;
   }
 
-  //✅ Verifica o horário antes de começar
-  const now = DateTime.now().setZone('America/Sao_Paulo');
-  const hour = now.hour;
-  console.log(`⏰ Hora atual em São Paulo: ${hour}h`);
-
-  if (hour < 7 || hour > 11) {
-    console.log('⏱ Fora do horário permitido. Execução cancelada.');
-    return;
-  }
-
   isRunning = true;
   try {
     await simulateVisits();
@@ -97,17 +87,6 @@ async function simulateVisitsWrapper() {
 
 
 app.get('/', (req, res) => {
-  //const now = DateTime.now().setZone('America/Sao_Paulo');
-  //const hour = now.hour;
-
-  //console.log(`⏰ Hora atual em São Paulo: ${hour}h`);
-
-  //if (hour < 7 || hour > 9) {
-    //res.send('⏱ Fora do horário programado, nenhuma visita será disparada.');
-    //console.log(`⏱ Requisição fora do horário permitido (${hour}h) - visitas não disparadas.`);
-    //return;
-  //}
-
   simulateVisitsWrapper(); // dispara a visita async
   res.send('🔄 Visita em processo (se não estiver rodando já)');
 });
